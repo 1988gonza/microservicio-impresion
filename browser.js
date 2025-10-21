@@ -1,21 +1,49 @@
 import puppeteer from "puppeteer";
-import { executablePath } from "puppeteer";
+import fs from "fs";
+import path from "path";
+
+let browserInstance = null;
+let closeTimeout = null;
 
 const isRender =
   process.env.RENDER === "true" || process.env.RENDER_EXTERNAL_URL;
 
-console.log(isRender, "isRender");
+// 🧠 Función para obtener el path correcto de Chrome en Render
+const getRenderChromePath = () => {
+  try {
+    const basePath = "/opt/render/.cache/puppeteer/chrome";
+    if (!fs.existsSync(basePath)) {
+      console.warn("⚠️ No se encontró la carpeta base de Chrome en Render.");
+      return null;
+    }
 
-let browserInstance = null; // Variable global para la instancia del navegador
-let closeTimeout = null;
+    const versions = fs.readdirSync(basePath);
+    if (!versions.length) {
+      console.warn("⚠️ No se encontró ninguna versión de Chrome en Render.");
+      return null;
+    }
 
-// Función para obtener la instancia del navegador
+    const latestVersion = versions[0]; // usa la primera carpeta encontrada (por ej. 141.0.7390.78)
+    const chromePath = path.join(
+      basePath,
+      latestVersion,
+      "chrome-linux64/chrome"
+    );
+
+    console.log(`🧩 Chrome detectado en Render: ${chromePath}`);
+    return chromePath;
+  } catch (err) {
+    console.error("❌ Error detectando Chrome en Render:", err);
+    return null;
+  }
+};
+
+// 🚀 Obtener instancia del navegador
 export const getBrowser = async () => {
   if (!browserInstance) {
     try {
-      browserInstance = await puppeteer.launch({
-        headless: true, // Establecer en true o false según tu necesidad
-        executablePath: isRender ? executablePath() : undefined, // 👈 solo en Render
+      const launchOptions = {
+        headless: true,
         args: [
           "--no-sandbox",
           "--disable-setuid-sandbox",
@@ -29,19 +57,29 @@ export const getBrowser = async () => {
           "--disable-hardware-acceleration",
           "--mute-audio",
         ],
-      });
+      };
+
+      // 🔍 Si estamos en Render, usamos el path detectado
+      if (isRender) {
+        const chromePath = getRenderChromePath();
+        if (chromePath) launchOptions.executablePath = chromePath;
+      }
+
+      browserInstance = await puppeteer.launch(launchOptions);
       console.log(
-        "Se esta llamando al browser del services, instancia creada correctamente."
+        `✅ Instancia de Chromium creada correctamente en ${
+          isRender ? "Render" : "Local"
+        }.`
       );
     } catch (error) {
-      console.error("Error al crear la instancia del navegador:", error);
+      console.error("❌ Error al crear la instancia del navegador:", error);
     }
   }
 
   return browserInstance;
 };
 
-// Cerrar manualmente el navegador
+// 🚪 Cierre manual del navegador
 export const closeBrowser = async () => {
   if (browserInstance) {
     console.log("🚪 Cerrando Chromium manualmente...");
@@ -50,8 +88,8 @@ export const closeBrowser = async () => {
   }
 };
 
-// Función para cerrar el navegador después de cierto tiempo de inactividad
-export const scheduleBrowserClose = (timeout = 6000000) => {
+// ⏳ Cierre automático por inactividad
+export const scheduleBrowserClose = (timeout = 600000) => {
   if (closeTimeout) clearTimeout(closeTimeout);
 
   closeTimeout = setTimeout(async () => {
@@ -63,6 +101,7 @@ export const scheduleBrowserClose = (timeout = 6000000) => {
   }, timeout);
 };
 
+// 🔚 Cierre seguro cuando se termina el proceso
 process.on("exit", async () => {
   if (browserInstance) {
     await browserInstance.close();
@@ -71,5 +110,5 @@ process.on("exit", async () => {
 });
 
 process.on("SIGINT", async () => {
-  process.exit(); // Triggea el 'exit'
+  process.exit(); // Dispara el evento 'exit'
 });
