@@ -1,16 +1,9 @@
 import puppeteer from "puppeteer";
 
-let browserInstance = null;
+let browserInstance = null; // Variable global para la instancia del navegador
+let closeTimeout = null;
 
-// Detecta si estamos en Render
-const isRender = process.env.RENDER === "true";
-
-export const getBrowser = async () => {
-  if (!browserInstance) {
-    try {
-      const launchOptions = {
-        headless: true,
-        args: [
+/** args: [
           "--no-sandbox",
           "--disable-setuid-sandbox",
           "--disable-dev-shm-usage",
@@ -22,26 +15,32 @@ export const getBrowser = async () => {
           "--disable-translate",
           "--disable-hardware-acceleration",
           "--mute-audio",
+        ], */
+
+// Función para obtener la instancia del navegador
+export const getBrowser = async () => {
+  if (!browserInstance) {
+    try {
+      browserInstance = await puppeteer.launch({
+        headless: true, // Establecer en true o false según tu necesidad
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
         ],
-      };
-
-      // Si estamos en Render, usar Chromium del cache
-      if (isRender) {
-        const { executablePath } = await import("puppeteer");
-        launchOptions.executablePath = executablePath();
-      }
-
-      browserInstance = await puppeteer.launch(launchOptions);
-      console.log("✅ Chromium iniciado correctamente");
+      });
+      console.log(
+        "Se esta llamando al browser del services, instancia creada correctamente."
+      );
     } catch (error) {
-      console.error("❌ Error al crear Chromium:", error);
+      console.error("Error al crear la instancia del navegador:", error);
     }
   }
 
   return browserInstance;
 };
 
-// Cerrar manualmente si se necesita
+// Cerrar manualmente el navegador
 export const closeBrowser = async () => {
   if (browserInstance) {
     console.log("🚪 Cerrando Chromium manualmente...");
@@ -50,7 +49,19 @@ export const closeBrowser = async () => {
   }
 };
 
-// Asegura cierre al terminar el proceso
+// Función para cerrar el navegador después de cierto tiempo de inactividad
+export const scheduleBrowserClose = (timeout = 6000000) => {
+  if (closeTimeout) clearTimeout(closeTimeout);
+
+  closeTimeout = setTimeout(async () => {
+    if (browserInstance) {
+      console.log("⏳ Cerrando instancia de Chromium por inactividad...");
+      await browserInstance.close();
+      browserInstance = null;
+    }
+  }, timeout);
+};
+
 process.on("exit", async () => {
   if (browserInstance) {
     await browserInstance.close();
@@ -58,5 +69,6 @@ process.on("exit", async () => {
   }
 });
 
-process.on("SIGINT", async () => process.exit());
-process.on("SIGTERM", async () => process.exit());
+process.on("SIGINT", async () => {
+  process.exit(); // Triggea el 'exit'
+});
