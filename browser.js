@@ -1,18 +1,14 @@
 import puppeteer from "puppeteer";
 
-let browserInstance = null; // Instancia global
-let closeTimeout = null;
+let browserInstance = null;
 
-// Detecta si estás corriendo en Render
+// Detecta si estamos en Render
 const isRender = process.env.RENDER === "true";
 
-/**
- * Obtiene la instancia del navegador
- */
 export const getBrowser = async () => {
   if (!browserInstance) {
     try {
-      browserInstance = await puppeteer.launch({
+      const launchOptions = {
         headless: true,
         args: [
           "--no-sandbox",
@@ -27,24 +23,25 @@ export const getBrowser = async () => {
           "--disable-hardware-acceleration",
           "--mute-audio",
         ],
-      });
+      };
 
-      console.log(
-        `🟢 Browser lanzado correctamente. Entorno: ${
-          isRender ? "Render" : "Local"
-        }`
-      );
+      // Si estamos en Render, usar Chromium del cache
+      if (isRender) {
+        const { executablePath } = await import("puppeteer");
+        launchOptions.executablePath = executablePath();
+      }
+
+      browserInstance = await puppeteer.launch(launchOptions);
+      console.log("✅ Chromium iniciado correctamente");
     } catch (error) {
-      console.error("❌ Error al crear la instancia del navegador:", error);
+      console.error("❌ Error al crear Chromium:", error);
     }
   }
 
   return browserInstance;
 };
 
-/**
- * Cierra el navegador manualmente
- */
+// Cerrar manualmente si se necesita
 export const closeBrowser = async () => {
   if (browserInstance) {
     console.log("🚪 Cerrando Chromium manualmente...");
@@ -53,23 +50,7 @@ export const closeBrowser = async () => {
   }
 };
 
-/**
- * Programa cierre automático por inactividad
- * @param {number} timeout Tiempo en ms (default 10 minutos)
- */
-export const scheduleBrowserClose = (timeout = 600000) => {
-  if (closeTimeout) clearTimeout(closeTimeout);
-
-  closeTimeout = setTimeout(async () => {
-    if (browserInstance) {
-      console.log("⏳ Cerrando instancia de Chromium por inactividad...");
-      await browserInstance.close();
-      browserInstance = null;
-    }
-  }, timeout);
-};
-
-// Maneja cierre en salida del proceso
+// Asegura cierre al terminar el proceso
 process.on("exit", async () => {
   if (browserInstance) {
     await browserInstance.close();
