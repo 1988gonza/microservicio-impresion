@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 import {
   formatearImportesPorPath,
   replacement,
-} from "mi-libreria-compartida/utils/helpers.js";
-import { ResponseHelper } from "mi-libreria-compartida/utils/responseHelper.js";
-import { createQR } from "mi-libreria-compartida/utils/createQr.js";
+} from "@1988gonza/mi-libreria-compartida/utils/helpers.js";
+import { ResponseHelper } from "@1988gonza/mi-libreria-compartida/utils/responseHelper.js";
+import { createQR } from "@1988gonza/mi-libreria-compartida/utils/createQr.js";
 
 // ===================== FUNCIONES LOCALES =====================
 async function crearQRdeAfip(datos = {}) {

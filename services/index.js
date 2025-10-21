@@ -5,5 +5,5 @@ export { ImpresionService } from "./impresionService.js";
 export { PdfService } from "./pdfService.js";
 export { StorageService } from "./storageService.js";
 export { TokenService } from "./tokenService.js";
-export { WorkerService } from "mi-libreria-compartida/services/workerService.js";
-export { ContratantesService } from "mi-libreria-compartida/services/contratanteService.js";
+export { WorkerService } from "@1988gonza/mi-libreria-compartida/services/workerService.js";
+export { ContratantesService } from "@1988gonza/mi-libreria-compartida/services/contratanteService.js";

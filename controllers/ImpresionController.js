@@ -1,4 +1,4 @@
-import { ResponseHelper } from "mi-libreria-compartida/utils/responseHelper.js";
+import { ResponseHelper } from "@1988gonza/mi-libreria-compartida/utils/responseHelper.js";
 
 export class ImpresionController {
   // Dependencias inyectadas por el bootstrap

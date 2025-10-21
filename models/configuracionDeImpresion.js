@@ -1,5 +1,5 @@
 // configuracionDeImpresion.js
-import BaseModel from "mi-libreria-compartida/models/base/BaseModelPg.js";
+import BaseModel from "@1988gonza/mi-libreria-compartida/models/base/BaseModelPg.js";
 
 export class ConfiguracionDeImpresion extends BaseModel {
   constructor() {

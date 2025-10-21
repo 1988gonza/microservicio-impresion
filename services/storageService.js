@@ -2,7 +2,7 @@ import { mkdir, copyFile, writeFile, readFile } from "fs/promises";
 import { createReadStream, createWriteStream } from "fs";
 import path from "path";
 import archiver from "archiver";
-import { __dirname } from "mi-libreria-compartida/utils/paths.js";
+import { __dirname } from "@1988gonza/mi-libreria-compartida/utils/paths.js";
 
 export class StorageService {
   constructor(baseContratante = "pdfs_contratantes") {

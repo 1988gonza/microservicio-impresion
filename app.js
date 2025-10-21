@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 
 import getConfig from "./config/index.js";
-import { initBootstrap } from "mi-libreria-compartida/bootstrap.js";
-import { mountRoutes } from "mi-libreria-compartida/utils/autoRoutes.js";
+import { initBootstrap } from "@1988gonza/mi-libreria-compartida/bootstrap.js";
+import { mountRoutes } from "@1988gonza/mi-libreria-compartida/utils/autoRoutes.js";
 import { __dirname } from "./utils/paths.js";
 import path from "node:path";
 import { getBrowser } from "./browser.js";
