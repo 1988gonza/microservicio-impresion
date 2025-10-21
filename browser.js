@@ -1,34 +1,28 @@
 import puppeteer from "puppeteer";
 
-let browserInstance = null; // Variable global para la instancia del navegador
+import { join } from "path";
+import { fileURLToPath } from "url";
+
+// Obtener la ruta del proyecto actual
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = join(__filename, "..");
+
+// Variable global para la instancia del navegador
+let browserInstance = null;
 let closeTimeout = null;
 
-/** args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-          "--disable-software-rasterizer",
-          "--disable-extensions",
-          "--disable-background-timer-throttling",
-          "--disable-backgrounding-occluded-windows",
-          "--disable-translate",
-          "--disable-hardware-acceleration",
-          "--mute-audio",
-        ], */
+// Configuración de Puppeteer para usar un directorio de cache dentro del proyecto
+const puppeteerConfig = {
+  headless: true,
+  args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+  cacheDirectory: join(__dirname, ".cache", "puppeteer"),
+};
 
 // Función para obtener la instancia del navegador
 export const getBrowser = async () => {
   if (!browserInstance) {
     try {
-      browserInstance = await puppeteer.launch({
-        headless: true, // Establecer en true o false según tu necesidad
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-        ],
-      });
+      browserInstance = await puppeteer.launch(puppeteerConfig);
       console.log(
         "Se esta llamando al browser del services, instancia creada correctamente."
       );
