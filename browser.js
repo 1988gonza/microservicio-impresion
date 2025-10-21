@@ -18,6 +18,8 @@ const puppeteerConfig = {
   cacheDirectory: join(__dirname, ".cache", "puppeteer"),
 };
 
+console.log(puppeteerConfig, "puppeteerConfig");
+
 // Función para obtener la instancia del navegador
 export const getBrowser = async () => {
   if (!browserInstance) {
