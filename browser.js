@@ -1,12 +1,5 @@
 import puppeteer from "puppeteer";
 
-import { join } from "path";
-import { fileURLToPath } from "url";
-
-// Obtener la ruta del proyecto actual
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = join(__filename, "..");
-
 // Variable global para la instancia del navegador
 let browserInstance = null;
 let closeTimeout = null;
@@ -15,7 +8,6 @@ let closeTimeout = null;
 const puppeteerConfig = {
   headless: true,
   args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-  cacheDirectory: join(__dirname, ".cache", "puppeteer"),
 };
 
 console.log(puppeteerConfig, "puppeteerConfig");
